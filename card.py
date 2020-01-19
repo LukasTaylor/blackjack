@@ -28,6 +28,30 @@ class Card:
         #return tuple which represents single card
         return (rank, face, suit)
 
+class Deck:
+    def __init__(self):
+        super().__init__()
+    
+    def createDeck(self):
+        deckSize = 0
+        deckLst = []
+        while(deckSize < 52):
+            cardTuple = card.createCard()
+            deckLst.append(cardTuple)
+            deckSize += 1
+        return deckLst
+    
+    def printDeck(self):
+        deckLst = self.createDeck()
+        i = 0
+        for i in range(52):
+            print(i)
+            print(deckLst[i])
+
 card = Card()
+deck = Deck()
+deck.printDeck()
+         
+
 #two.printCard()
 #cardTuple = card.createCard()
