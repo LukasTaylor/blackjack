@@ -4,7 +4,7 @@ class Deck:
         self.cardLst = []
         self.cardPair = ()
     
-    def getCard(self):
+    def getCards(self):
         suitLst = ['S', 'C', 'D', 'H']
         rankLst = [2, 3, 4, 5, 6, 7, 8, 9, 10]
         faceLst = ['J', 'Q', 'K', 'A']
@@ -24,13 +24,39 @@ class Deck:
                 self.cardLst.append(self.cardPair)
                 j+=1
             i +=1
+        return self.cardLst
 
-    def printDeck(self):
+class Game:
+    def __init__(self):
+        super().__init__()
+        self.shoeLst = []
+        self.numDecks = 1
+        self.deck = Deck()
+        self.askShoeSize()
+        
+    def createShoe(self):
+        tempLst = []
         i = 0
-        for i in range(52):
-            print(i)
-            print(self.cardLst[i])
+        #add one deck of cards per iteration
+        for i in range(self.numDecks):
+            tempLst.append(self.deck.getCards())
+            i += 1
+        #combine decks together to create one big shoe for gameplay
+        self.shoeLst.append(tempLst[0])
+        
+    def askShoeSize(self):
+        #cast input to int
+        self.numDecks = int(input("How many decks should be in the shoe?"))
+        self.createShoe()
+        
+    def printShoe(self):
+        i = 0
+        for i in range(len(self.shoeLst)):
+            print(self.shoeLst[i])
+    
 
-deck = Deck()
+""" deck = Deck()
 deck.getCard()
-deck.printDeck()
+deck.printDeck() """
+newGame = Game()
+newGame.printShoe()
