@@ -78,11 +78,6 @@ class Game:
                 i += 1
             self.firstDeal = False
         else:
-            #i = 0
-            #j = 0
-            """ 
-            Need to create flag so the dealer doesn't get a new card everytime a player wants to hit
-            """
             if(not self.dealerHit):
                 cardTuple = self.shoeLst[0][random.randint(1, len(self.shoeLst[0]))]
                 self.playerDict.setdefault(loopCounter, []).append(cardTuple)
@@ -93,65 +88,71 @@ class Game:
                 self.dealerHandLst.append(cardTuple)
                 self.shoeLst[0].remove(cardTuple)
 
-        print(self.playerDict)
-        
-        """ print('player')
-        print(self.playersHandLst) """
+        """ print(self.playerDict.get(loopCounter))
         print('dealer')
-        print(self.dealerHandLst)
+        print(self.dealerHandLst) """
 
     def checkWinner(self):
         playerStillHitting = True
+        hitOrNah = ''
         #playerHitLst = []
         playerBust = False
 
+        #check if dealer has blackjack
         self.checkDealerBlackJack()
-        
+
+        print("Dealer hand:")
+        print(self.dealerHandLst)
+
         #initialize loop counter
         i = 0
         #loop through players and ask if they want to hit
         while(self.inPlay):
-            for i in range(self.numPlayers):
+            for i in range(self.numPlayers): 
                 while(playerStillHitting):
-                    hitOrNah = input("Player " + str(i) + " Hit or Stay? Type 'H' or 'S'")
+                    playerBlackJack = self.checkPlayerBlackJack(i)
+                    print("Player " + str(i+1) + " hand")
+                    self.printHand(i)
+                    #end players opportunity to hit if they've got blackjack
+                    if(not playerBlackJack):
+                        hitOrNah = input("Player " + str(i+1) + " Hit or Stay? Type 'H' or 'S'")
+                    else:
+                        playerStillHitting = False
+                        print("****BLACKJACK*****")
                     if(hitOrNah == 'H' or hitOrNah == 'h' ):
-                        #playerHitLst.append('h')
                         self.dealCards(i)
                         #check if player has bust or not. Will return true if bust has occured
                         playerBust = self.checkBust(i)
                         #remove player from play if they bust
                         if(playerBust):
+                            print("Player " + str(i+1) + " hand")
+                            self.printHand(i)
                             print("***BUST***")
                             playerStillHitting = False
-                            removedVal = self.playerDict.pop(i)
-                            print(removedVal)
-                        else:
-                            #reset to true so other players can hit
-                            playerStillHitting = True
-                            #need this to ask the player
-                            hitOrNah = input("Player " + str(i) + " Hit or Stay: Type 'H' or 'S'" )
-                            #check if the player has NOT busted and if they want to hit
-                            if(not playerBust and hitOrNah == 'H' or hitOrNah == 'h'):
-                                self.dealCards(i)
-                                self.checkBust(i)
+                            self.playerDict.pop(i)
                     elif(hitOrNah == 'S' or hitOrNah == 's'):
                         playerStillHitting = False
-                        #playerHitLst.append('s')
-                        #self.inPlay = False
                     else:
                         print("Please type 'H' to Hit or 'S' to Stay")
                         print()
                 playerStillHitting = True
                 i += 1
-                """
-                    find a way to ensure dealer gets to hit when all the players
-                    have finished hitting or staying.
-                    Already have a list containing player hit or stay
-                """
-                #all players have hit or stayed now it's dealers turn
-                if( i == self.numPlayers):
-                    self.dealerHit = True
-                    self.dealCards(0)
+
+            #all players have hit or stayed now it's dealers turn
+            if( i == self.numPlayers):
+                self.dealerHit = True
+                self.dealCards(0)
+                dealerBust = self.checkBust(0)
+                if(dealerBust):
+                    print("***DEALER BUST***")
+                    print("Everybody wins!!!")
+
+                    self.inPlay = False
+                else:
+                    self.payDealer()
+            print(self.playerDict)
+            print(len(self.playerDict))
+            #gameover
             self.inPlay = False
             
     def checkDealerBlackJack(self):
@@ -159,44 +160,94 @@ class Game:
         dealerDownCard = self.dealerHandLst[0][0]
         dealerUpCard = self.dealerHandLst[1][0]
 
-        print("Down card " + str(dealerDownCard))
-        print("Up card " + str(dealerUpCard))
-        
         #check if dealer has a blackjack. End the game if true
-        if(dealerUpCard == 'A' and dealerDownCard == '10'):
+        if(dealerUpCard == 'A' and dealerDownCard == '10' or dealerUpCard == '10' and dealerDownCard == 'A'):
             self.inPlay = False
-        elif(dealerUpCard == 'A' and dealerDownCard == 'J'):
+        elif(dealerUpCard == 'A' and dealerDownCard == 'J' or dealerUpCard == 'J' and dealerDownCard == 'A'):
             self.inPlay = False
-        elif(dealerUpCard == 'A' and dealerDownCard == 'Q'):
+        elif(dealerUpCard == 'A' and dealerDownCard == 'Q' or dealerUpCard == 'Q' and dealerDownCard == 'A'):
             self.inPlay = False
-        elif(dealerUpCard == 'A' and dealerDownCard == 'K'):
+        elif(dealerUpCard == 'A' and dealerDownCard == 'K' or dealerUpCard == 'K' and dealerDownCard == 'A'):
             self.inPlay = False
         else:
             self.inPlay = True
+    
+    def checkPlayerBlackJack(self, playerNum):
+        handValue = 0
 
-    def checkBust(self, playerNum):
-        """
-            loop through players hand to determine if they have busted or not
-        """
-        playerHandValue = 0
-        playerHandLst = self.playerDict.get(playerNum)
+        #retrieve player's hand
+        handLst = self.playerDict.get(playerNum)
+        
+        #loop through players hand to determine if they have busted or not
         i = 0
-        for i in range(len(playerHandLst)):
-            if(playerHandLst[i][0] == 'J'):
-                playerHandValue += 10
-            elif(playerHandLst[i][0] == 'Q'):
-                playerHandValue += 10
-            elif(playerHandLst[i][0] == 'K'):
-                playerHandValue += 10
+        for i in range(len(handLst)):
+            if(handLst[i][0] == 'J'):
+                handValue += 10
+            elif(handLst[i][0] == 'Q'):
+                handValue += 10
+            elif(handLst[i][0] == 'K'):
+                handValue += 10
+            elif(handLst[i][0] == 'A'):
+                if(len(handLst) < 2):
+                    handValue += 1
+                else:
+                    handValue += 11
             else:
-                playerHandValue += playerHandLst[i][0]
-            if(playerHandValue > 21):
+                handValue += handLst[i][0]
+            
+            #return true if player has blackjack
+            if(handValue == 21):
+                return True
+            
+            i += 1
+        return False
+            
+    def checkBust(self, playerNum):
+        handValue = 0
+        
+        if(self.dealerHit):
+            handLst = self.dealerHandLst
+        else:
+            handLst = self.playerDict.get(playerNum)
+        
+        #loop through players hand to determine if they have busted or not
+        i = 0
+        for i in range(len(handLst)):
+            if(handLst[i][0] == 'J'):
+                handValue += 10
+            elif(handLst[i][0] == 'Q'):
+                handValue += 10
+            elif(handLst[i][0] == 'K'):
+                handValue += 10
+            elif(handLst[i][0] == 'A'):
+                askUser = input("Should Ace = 1 or 11?")
+                if(int(askUser) == 1):
+                    handValue += 1
+                else:
+                    handValue += 11
+            else:
+                handValue += handLst[i][0]
+            #return true if player busts
+            if(handValue > 21):
                 return True
             i += 1
+        return False
 
-        """
-            return true or false if the player has busted
-        """
+    def payDealer(self):
+        print("payDealer()")
+        dealerWinTotal = 0
+        i = 0
+        for i in range(len(self.playerDict)):
+            print("paid")
+            i += 1
+
+
+
+    def printHand(self, playerNum):
+        if(self.dealerHit):
+            print(self.dealerHandLst)
+        else:
+            print(self.playerDict.get(playerNum))
 
     def userPrompt(self):
         #cast input to int
