@@ -88,14 +88,9 @@ class Game:
                 self.dealerHandLst.append(cardTuple)
                 self.shoeLst[0].remove(cardTuple)
 
-        """ print(self.playerDict.get(loopCounter))
-        print('dealer')
-        print(self.dealerHandLst) """
-
     def checkWinner(self):
         playerStillHitting = True
         hitOrNah = ''
-        #playerHitLst = []
         playerBust = False
 
         #check if dealer has blackjack
@@ -146,7 +141,6 @@ class Game:
                 if(dealerBust):
                     print("***DEALER BUST***")
                     print("Everybody wins!!!")
-
                     self.inPlay = False
                 else:
                     self.payDealer()
@@ -174,10 +168,8 @@ class Game:
     
     def checkPlayerBlackJack(self, playerNum):
         handValue = 0
-
         #retrieve player's hand
         handLst = self.playerDict.get(playerNum)
-        
         #loop through players hand to determine if they have busted or not
         i = 0
         for i in range(len(handLst)):
@@ -204,7 +196,6 @@ class Game:
             
     def checkBust(self, playerNum):
         handValue = 0
-        
         if(self.dealerHit):
             handLst = self.dealerHandLst
         else:
@@ -240,8 +231,6 @@ class Game:
         for i in range(len(self.playerDict)):
             print("paid")
             i += 1
-
-
 
     def printHand(self, playerNum):
         if(self.dealerHit):
